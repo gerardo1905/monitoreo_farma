@@ -1,0 +1,34 @@
+# Gradle / Android Studio
+*.iml
+.gradle/
+.kotlin/
+/build/
+/app/build/
+/captures/
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android Studio (se conserva solo lo compartible)
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deploymentTargetDropdown.xml
+/.idea/other.xml
+/.idea/misc.xml
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Respaldos y archivos temporales (no deben subirse)
+/_backup_original/
+/Claude outputs/
+*.apk
+*.aab
+*.keystore
+*.jks

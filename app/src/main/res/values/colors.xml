@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <!-- Color de la ventana mientras carga la app (coincide con el fondo del degradado) -->
+    <color name="fondo_ventana">#FFF4F6FB</color>
+</resources>

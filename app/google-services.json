@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "168486927218",
+    "firebase_url": "https://invernadero-658e6-default-rtdb.firebaseio.com",
+    "project_id": "invernadero-658e6",
+    "storage_bucket": "invernadero-658e6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168486927218:android:a172f8f54fe18a4aedbbeb",
+        "android_client_info": {
+          "package_name": "com.collinao.invernadero"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZpza4D6qEB5IlpEtUbe2RfWYvBwAKDeg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

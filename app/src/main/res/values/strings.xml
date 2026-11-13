@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Todos los textos que ve el usuario. Para traducir la app a otro idioma basta con crear
+    values-en/strings.xml con las mismas claves. Los nombres siguen el patrón <pantalla>_<elemento>.
+-->
+<resources>
+
+    <!-- ===== General ===== -->
+    <string name="app_name">Invernadero</string>
+    <string name="guardar">Guardar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="ver">Ver</string>
+    <string name="ocultar">Ocultar</string>
+    <string name="verificando_permisos">Verificando permisos…</string>
+    <string name="correo">Correo electrónico</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="contrasena_confirmar">Confirmar contraseña</string>
+    <string name="contrasena_actual">Contraseña actual</string>
+    <string name="contrasena_nueva">Nueva contraseña</string>
+    <string name="contrasena_nueva_confirmar">Confirmar nueva contraseña</string>
+    <string name="temperatura">Temperatura</string>
+    <string name="humedad">Humedad relativa</string>
+    <string name="hace_segundos">hace %1$d s</string>
+    <string name="hace_minutos">hace %1$d min</string>
+    <string name="hace_horas">hace %1$d h</string>
+
+    <!-- ===== Errores comunes (formularios y autenticación) ===== -->
+    <string name="error_campos">Completa todos los campos</string>
+    <string name="error_correo_invalido">Ingresa un correo válido</string>
+    <string name="error_inesperado">Error inesperado, intenta de nuevo</string>
+    <string name="error_login_generico">No se pudo iniciar sesión. Intenta de nuevo.</string>
+    <string name="error_registro">No se pudo crear la cuenta. Intenta de nuevo.</string>
+    <string name="error_password_requisitos">La contraseña no cumple todos los requisitos</string>
+    <string name="error_password_no_coinciden">Las contraseñas no coinciden</string>
+    <string name="auth_sin_conexion">Sin conexión a internet</string>
+    <string name="auth_sin_sesion">No hay sesión activa</string>
+    <string name="auth_sin_correo">La cuenta no tiene correo</string>
+    <string name="auth_demasiados">Demasiados intentos. Espera unos minutos.</string>
+    <string name="auth_demasiados_dispositivo">Demasiados intentos desde este dispositivo. Espera unos minutos.</string>
+    <string name="auth_password_debil">La contraseña es muy débil</string>
+    <string name="auth_correo_existente">Ya existe una cuenta con este correo</string>
+    <string name="auth_password_actual_incorrecta">La contraseña actual es incorrecta</string>
+    <string name="auth_cambio_error">No se pudo cambiar la contraseña. Intenta de nuevo.</string>
+    <string name="auth_verificacion_espera">Espera unos minutos antes de pedir otro correo de verificación</string>
+    <string name="auth_verificacion_error">No se pudo enviar el correo de verificación</string>
+
+    <!-- ===== Inicio de sesión ===== -->
+    <string name="login_titulo">Bienvenido</string>
+    <string name="login_subtitulo">Monitoreo de temperatura y humedad para el almacenamiento de medicamentos y productos sensibles.</string>
+    <string name="login_boton">Iniciar sesión</string>
+    <string name="login_olvide">¿Olvidaste tu contraseña?</string>
+    <string name="login_sin_cuenta">¿No tienes cuenta? Regístrate</string>
+    <string name="login_error_campos">Completa ambos campos</string>
+    <string name="login_error_credenciales">Credenciales incorrectas. Intentos restantes: %1$d</string>
+    <string name="login_error_bloqueada">Cuenta bloqueada por demasiados intentos fallidos. Pulsa «Recuperar contraseña» para recuperar el acceso.</string>
+    <string name="login_error_deshabilitada">Tu cuenta ha sido deshabilitada. Contacta al administrador.</string>
+    <string name="sesion_cerrada_inactividad">Sesión cerrada por inactividad</string>
+
+    <!-- ===== Registro ===== -->
+    <string name="registro_titulo">Crear cuenta</string>
+    <string name="registro_subtitulo">Usa una contraseña segura: protege el acceso al almacén.</string>
+    <string name="registro_boton">Registrarme</string>
+    <string name="registro_ya_tengo">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="registro_seguridad">Seguridad: %1$s</string>
+    <string name="fortaleza_vacia"></string>
+    <string name="fortaleza_muy_debil">Muy débil</string>
+    <string name="fortaleza_debil">Débil</string>
+    <string name="fortaleza_buena">Buena</string>
+    <string name="fortaleza_fuerte">Fuerte</string>
+
+    <!-- Requisitos de la política de contraseñas -->
+    <string name="req_longitud">Entre %1$d y %2$d caracteres</string>
+    <string name="req_mayuscula">Una letra mayúscula</string>
+    <string name="req_minuscula">Una letra minúscula</string>
+    <string name="req_numero">Un número</string>
+    <string name="req_simbolo">Un símbolo (por ejemplo ! # $ &amp; *)</string>
+    <string name="req_sin_espacios">Sin espacios</string>
+    <string name="req_no_comun">No es una contraseña común</string>
+    <string name="req_sin_correo">No contiene tu correo</string>
+
+    <!-- ===== Recuperar contraseña ===== -->
+    <string name="recuperar_titulo">Recuperar contraseña</string>
+    <string name="recuperar_contrasena">Recuperar contraseña</string>
+    <string name="recuperar_descripcion">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="recuperar_boton">Enviar enlace</string>
+    <string name="recuperar_error_vacio">Ingresa tu correo electrónico</string>
+    <string name="recuperar_error_espera">Espera un minuto antes de pedir otro enlace</string>
+    <string name="recuperar_error_envio">Error al enviar el correo</string>
+    <string name="recuperar_exito">Si el correo existe, se envió un enlace para restablecer tu contraseña.</string>
+
+    <!-- ===== Panel principal ===== -->
+    <string name="dashboard_titulo">Monitoreo</string>
+    <string name="dashboard_subtitulo">Zona de almacenamiento</string>
+    <string name="dispositivo_en_linea">Dispositivo en línea</string>
+    <string name="dispositivo_desconectado">Dispositivo desconectado</string>
+    <string name="ultima_senal">Última señal %1$s</string>
+    <string name="sin_senal">Sin señal registrada</string>
+    <string name="ultima_lectura">Última lectura %1$s</string>
+    <string name="sin_lecturas">Aún no hay lecturas</string>
+    <string name="rango_normal_temp">Rango: %1$.1f a %2$.1f °C</string>
+    <string name="rango_normal_hum">Rango: %1$.0f a %2$.0f %%</string>
+    <string name="nivel_normal">En rango</string>
+    <string name="nivel_advertencia">Atención</string>
+    <string name="nivel_critico">Crítico</string>
+    <string name="nivel_sin_datos">Sin datos</string>
+    <string name="alerta_temp_alta">Temperatura alta: %1$.1f °C (máx. %2$.1f °C)</string>
+    <string name="alerta_temp_baja">Temperatura baja: %1$.1f °C (mín. %2$.1f °C)</string>
+    <string name="alerta_hum_alta">Humedad alta: %1$.0f %% (máx. %2$.0f %%)</string>
+    <string name="alerta_hum_baja">Humedad baja: %1$.0f %% (mín. %2$.0f %%)</string>
+    <string name="equipos">Equipos</string>
+    <string name="automatizacion_desactivada">La automatización está desactivada en Ajustes: todo funciona en manual.</string>
+    <string name="encendido">Encendido</string>
+    <string name="apagado">Apagado</string>
+    <string name="ajustes_equipos_titulo">Modo de los equipos</string>
+    <string name="ajustes_equipos_desc">Activado: el equipo se enciende solo según los rangos. Desactivado: solo lo controlas tú desde el panel.</string>
+    <string name="modo_automatico">Automático</string>
+    <string name="modo_manual">Manual</string>
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_graficas">Gráficas</string>
+    <string name="nav_ajustes">Ajustes</string>
+    <string name="nav_registros">Registros</string>
+    <string name="nav_perfil">Perfil</string>
+
+    <!-- Equipos (los nombres se pueden cambiar aquí según la instalación) -->
+    <string name="actuador_bomba">Bomba de agua</string>
+    <string name="actuador_ventilador">Ventilador</string>
+    <string name="actuador_bocina">Bocina</string>
+    <string name="actuador_led">Indicador LED</string>
+    <string name="actuador_desconocido">Equipo</string>
+
+    <!-- ===== Ajustes ===== -->
+    <string name="ajustes_titulo">Ajustes</string>
+    <string name="ajustes_solo_admin">Solo un administrador puede modificar estos valores.</string>
+    <string name="ajustes_automatizacion">Automatización</string>
+    <string name="ajustes_automatizacion_desc">Enciende y apaga los equipos según los umbrales.</string>
+    <string name="ajustes_rol_detectado">Sesión: %1$s</string>
+    <string name="ajustes_error_permiso">Firebase rechazó el cambio (permiso denegado). Comprueba que publicaste las reglas más recientes y que tu cuenta es administrador y está activa.</string>
+    <string name="ajustes_error_guardar">No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="ajustes_minimo">Mínimo</string>
+    <string name="ajustes_maximo">Máximo</string>
+    <string name="ajustes_guardar">Guardar cambios</string>
+    <string name="ajustes_descartar">Descartar</string>
+    <string name="ajustes_guardado">Cambios guardados</string>
+    <string name="ajustes_error_numero">Ingresa un número</string>
+    <string name="ajustes_error_rango">Entre %1$s y %2$s</string>
+    <string name="ajustes_error_mayor_que_minimo">Debe ser mayor que el mínimo</string>
+    <string name="ajustes_emergencia_titulo">Protocolo de emergencia</string>
+    <string name="ajustes_emergencia_desc">Qué ocurre cuando se supera un límite de alarma por valores altos.</string>
+    <string name="ajustes_emergencia_paso1">Suena la alarma en todos los teléfonos con sesión abierta.</string>
+    <string name="ajustes_emergencia_paso2">Tienes 2 minutos para activar el equipo de emergencia desde la alarma (bomba de agua si es temperatura, ventilador si es humedad); si no lo haces, el sistema lo enciende solo.</string>
+    <string name="ajustes_emergencia_paso3">Si el problema sigue, la alarma vuelve a sonar cada 2 minutos hasta que se solucione.</string>
+    <string name="ajustes_umbrales_titulo">Rango recomendado</string>
+    <string name="ajustes_umbrales_desc">Fuera de este rango la automatización actúa y se avisa en pantalla.</string>
+    <string name="ajustes_alarma_titulo">Alarma crítica</string>
+    <string name="ajustes_alarma_desc">Fuera de estos límites suena la alarma con sonido y pantalla completa.</string>
+
+    <!-- ===== Gráficas ===== -->
+    <string name="graficas_titulo">Gráficas</string>
+    <string name="rango_1h">1 h</string>
+    <string name="rango_6h">6 h</string>
+    <string name="rango_24h">24 h</string>
+    <string name="grafica_actual">Actual</string>
+    <string name="grafica_min">Mín.</string>
+    <string name="grafica_max">Máx.</string>
+    <string name="grafica_prom">Prom.</string>
+    <string name="graficas_error_permiso">No se pudo leer el historial: %1$s</string>
+    <string name="graficas_total">Lecturas guardadas: %1$d (se guarda una por minuto)</string>
+    <string name="grafica_sin_datos">Aún no hay suficientes lecturas (se guarda una por minuto)</string>
+    <string name="graficas_nota">Las líneas punteadas son los límites del rango recomendado. Se guarda una lectura por minuto durante 24 horas.</string>
+
+    <!-- ===== Registros de auditoría ===== -->
+    <string name="registros_titulo">Registros</string>
+    <string name="registros_restringido">Acceso restringido: solo los administradores pueden ver los registros.</string>
+    <string name="registros_cantidad">%1$d registro(s) · se muestran los últimos 200</string>
+    <string name="registros_vacio">No hay registros en esta categoría.</string>
+    <string name="registros_por">Por: %1$s</string>
+
+    <!-- ===== Perfil ===== -->
+    <string name="perfil_titulo">Perfil</string>
+    <string name="rol_admin">Administrador</string>
+    <string name="rol_usuario">Usuario</string>
+    <string name="correo_verificado">Correo verificado</string>
+    <string name="correo_sin_verificar">Correo sin verificar</string>
+    <string name="reenviar_verificacion">Reenviar verificación</string>
+    <string name="cambiar_contrasena">Cambiar contraseña</string>
+    <string name="panel_admin">Panel de administración</string>
+    <string name="cerrar_sesion">Cerrar sesión</string>
+    <string name="perfil_verificacion_enviada">Te enviamos un correo de verificación. Revisa tu bandeja de entrada.</string>
+    <string name="perfil_error_misma_password">La nueva contraseña debe ser distinta a la actual</string>
+    <string name="perfil_password_cambiada">Contraseña actualizada correctamente</string>
+
+    <!-- ===== Administración ===== -->
+    <string name="admin_titulo">Administración</string>
+    <string name="admin_restringido">Acceso restringido: solo los administradores pueden entrar aquí.</string>
+    <string name="admin_ver_registros">Ver registros de auditoría</string>
+    <string name="admin_usuarios">%1$d usuario(s) registrados</string>
+    <string name="admin_tu">(tú)</string>
+    <string name="admin_administrador">Administrador</string>
+    <string name="admin_cuenta_activa">Cuenta activa</string>
+
+    <!-- ===== Alarma y notificaciones ===== -->
+    <string name="alarma_titulo">ALARMA CRÍTICA</string>
+    <string name="alarma_se_repite">Si el problema continúa, la alarma volverá a sonar cada 2 minutos.</string>
+    <string name="alarma_emergencia_titulo">Emergencia: %1$s</string>
+    <string name="alarma_equipo_cuenta">El sistema activará %1$s automáticamente en %2$s</string>
+    <string name="alarma_equipo_activando">Activando %1$s automáticamente…</string>
+    <string name="alarma_equipo_activo">%1$s activo. Vigilando que los valores bajen.</string>
+    <string name="alarma_activar_equipo">Activar %1$s ahora</string>
+    <string name="alarma_equipo_activado_detalle">%1$s de emergencia activado manualmente desde la alarma</string>
+    <string name="alarma_instruccion">Revisa de inmediato el área de almacenamiento.</string>
+    <string name="alarma_silenciar">Silenciar alarma</string>
+    <string name="alarma_motivo_defecto">Valores fuera de rango</string>
+    <string name="alarma_silenciada_detalle">Alarma silenciada manualmente: %1$s</string>
+    <string name="alarma_temp_muy_alta">Temperatura MUY ALTA: %1$.1f °C (límite %2$.1f °C)</string>
+    <string name="alarma_temp_muy_baja">Temperatura MUY BAJA: %1$.1f °C (límite %2$.1f °C)</string>
+    <string name="alarma_hum_muy_alta">Humedad MUY ALTA: %1$.0f %% (límite %2$.0f %%)</string>
+    <string name="alarma_hum_muy_baja">Humedad MUY BAJA: %1$.0f %% (límite %2$.0f %%)</string>
+    <string name="canal_alarma_nombre">Alarma crítica</string>
+    <string name="canal_alarma_desc">Alarma cuando la temperatura o la humedad salen del rango crítico</string>
+    <string name="canal_monitoreo_nombre">Monitoreo activo</string>
+    <string name="canal_monitoreo_desc">Mantiene la vigilancia de temperatura y humedad en segundo plano</string>
+    <string name="monitoreo_titulo">Monitoreo activo</string>
+    <string name="monitoreo_texto">Vigilando temperatura y humedad del almacén</string>
+</resources>
