@@ -4,6 +4,8 @@ import com.collinao.invernadero.InvernaderoApp
 import com.collinao.invernadero.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.collinao.invernadero.data.local.AccionLocal
+import com.collinao.invernadero.data.local.BitacoraLocal
 import com.collinao.invernadero.data.model.ActuadorId
 import com.collinao.invernadero.data.model.AuditCategoria
 import com.collinao.invernadero.data.model.DeviceStatus
@@ -32,7 +34,10 @@ class DashboardViewModel(
 ) : ViewModel() {
 
     private companion object {
-        /** Si no llega señal en este tiempo, el dispositivo se considera desconectado. */
+        /**
+         * FALLA SEGURA (fail-safe): si el ESP32 no envía su latido en 15 s, la app lo muestra como
+         * DESCONECTADO (nunca muestra "en línea" con datos viejos).
+         */
         const val SIN_SENAL_MS = 15_000L
     }
 
@@ -77,6 +82,30 @@ class DashboardViewModel(
         combine(deviceStatus, segundosDesdeSenal) { estado, segundos ->
             estado.online && segundos != null && segundos * 1000 < SIN_SENAL_MS
         }.stateIn(viewModelScope, inicio, false)
+
+    /**
+     * RECONEXIÓN AUTOMÁTICA (3.1.1.3 / 3.1.2.7): true si el TELÉFONO está conectado al servidor de Firebase.
+     * Si es false, la app muestra los datos guardados en el teléfono y deja los cambios en cola;
+     * el SDK reconecta solo y entonces sincroniza lo pendiente.
+     */
+    val conectadoServidor: StateFlow<Boolean> = deviceRepository.observarConexionServidor()
+        .catch { emit(false) }
+        .stateIn(viewModelScope, inicio, true)
+
+    /** 3.1.1.4: lecturas que el ESP32 guardó sin conexión y está subiendo. */
+    val pendientesDispositivo: StateFlow<Int> =
+        combine(deviceStatus, conectadoServidor) { estado, conectado -> if (conectado) estado.pendientes else 0 }
+            .stateIn(viewModelScope, inicio, 0)
+
+    /** 3.1.2.7: últimas acciones guardadas en la base local del teléfono, con su estado de sincronización. */
+    val accionesLocales: StateFlow<List<AccionLocal>> = BitacoraLocal.get().observarUltimas(8)
+        .catch { }
+        .stateIn(viewModelScope, inicio, emptyList())
+
+    /** 3.1.2.7: acciones hechas sin conexión que esperan sincronizarse. */
+    val accionesPendientes: StateFlow<Int> = BitacoraLocal.get().observarPendientes()
+        .catch { }
+        .stateIn(viewModelScope, inicio, 0)
 
     /** Segundos desde la última lectura de sensores (null si aún no hay). */
     val segundosDesdeLectura: StateFlow<Long?> =

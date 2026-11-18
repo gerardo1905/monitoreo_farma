@@ -1,5 +1,6 @@
 package com.collinao.invernadero.data.repository
 
+import com.collinao.invernadero.data.local.BitacoraLocal
 import com.collinao.invernadero.data.model.AuditEvent
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -14,6 +15,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Bitácora de auditoría: registros/<categoria>/<idPush>.
@@ -25,21 +29,37 @@ class AuditRepository {
 
     private fun construir(tipo: String, detalle: String, usuario: String?): Map<String, Any> {
         val user = Firebase.auth.currentUser
+        // 3.1.2.7: si la acción se hace SIN conexión, el registro queda en cola en el teléfono y llega al
+        // servidor al reconectar. Se anota la hora real en que se hizo, para el historial de acciones.
+        val detalleFinal = if (BitacoraLocal.servidorConectado) detalle else {
+            val hora = SimpleDateFormat("dd/MM HH:mm:ss", Locale.getDefault()).format(Date())
+            "$detalle [realizada sin conexión el $hora]"
+        }
         return mapOf(
             "tipo" to tipo,
-            "detalle" to detalle.take(300),
+            "detalle" to detalleFinal.take(300),
             "usuario" to (usuario ?: user?.email ?: "Anónimo").take(100),
             "uid" to (user?.uid ?: ""),
             "timestamp" to ServerValue.TIMESTAMP
         )
     }
 
-    /** Registra y sigue (no bloquea). Si falla por red o permisos, no rompe la app. */
+    /** FALLA SEGURA (fail-safe): registra y sigue (no bloquea). Si falla por red o permisos, no rompe la app. */
     fun registrar(categoria: String, tipo: String, detalle: String, usuario: String? = null) {
         try {
             registrosRef.child(categoria).push().setValue(construir(tipo, detalle, usuario))
         } catch (e: Exception) {
             // La bitácora nunca debe tumbar la app
+        }
+    }
+
+    /** Registra y avisa en [alConfirmar] cuando el servidor procesa el registro (aunque sea al reconectar). */
+    fun registrarConConfirmacion(categoria: String, tipo: String, detalle: String, alConfirmar: (Boolean) -> Unit) {
+        try {
+            registrosRef.child(categoria).push().setValue(construir(tipo, detalle, null))
+                .addOnCompleteListener { alConfirmar(it.isSuccessful) }
+        } catch (e: Exception) {
+            alConfirmar(false)
         }
     }
 

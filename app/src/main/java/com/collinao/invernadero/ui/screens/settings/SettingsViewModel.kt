@@ -28,12 +28,13 @@ import kotlinx.coroutines.launch
  * (si se cambian aquí, hay que cambiarlos también en database.rules.json).
  */
 enum class Umbral(val minimo: Float, val maximo: Float, val esTemperatura: Boolean) {
-    TEMP_MIN(-5f, 20f, true),
-    TEMP_MAX(-5f, 20f, true),
+    // Temperatura: rango de medición del sensor DHT11 (0–50 °C)
+    TEMP_MIN(0f, 50f, true),
+    TEMP_MAX(0f, 50f, true),
     HUM_MIN(0f, 100f, false),
     HUM_MAX(0f, 100f, false),
-    ALARMA_TEMP_MIN(-10f, 20f, true),
-    ALARMA_TEMP_MAX(-5f, 25f, true),
+    ALARMA_TEMP_MIN(-10f, 50f, true),
+    ALARMA_TEMP_MAX(0f, 60f, true),
     ALARMA_HUM_MIN(0f, 100f, false),
     ALARMA_HUM_MAX(0f, 100f, false)
 }
@@ -143,7 +144,7 @@ class SettingsViewModel(
         deviceRepository.guardarThresholds(guardado.copy(automatizacionActiva = v)) { error ->
             if (error == null) {
                 // Al activar la automatización, ningún equipo debe quedar olvidado en modo manual
-                if (v) deviceRepository.todosAutomaticos()
+                if (v) deviceRepository.todosAutomaticos(estadosEquipos.mapValues { it.value.encendido })
                 auditRepository.registrar(
                     AuditCategoria.CONFIGURACION, "AUTOMATIZACION_CAMBIADA",
                     "Automatización ${if (v) "activada" else "desactivada"}"
@@ -160,7 +161,7 @@ class SettingsViewModel(
         if (!esAdmin) return
         automaticos[id] = automatico
         if (automatico) {
-            deviceRepository.setModoAutomatico(id)
+            deviceRepository.setModoAutomatico(id, estadosEquipos[id]?.encendido ?: false)
         } else {
             // Pasa a manual conservando su estado actual (encendido/apagado)
             deviceRepository.setActuador(id, estadosEquipos[id]?.encendido ?: false)

@@ -1,0 +1,9 @@
+// PLANTILLA (sí se sube al repositorio, sin la clave real).
+// Copia este archivo como:
+//   app/src/main/java/com/collinao/invernadero/security/ClaveHmac.kt
+// y reemplaza el valor por la misma clave que HMAC_KEY en esp32/monitoreo_farma_esp32/secrets.h
+package com.collinao.invernadero.security
+
+internal object ClaveHmac {
+    const val HMAC_KEY = "CLAVE_HMAC_DE_64_CARACTERES_HEX"
+}

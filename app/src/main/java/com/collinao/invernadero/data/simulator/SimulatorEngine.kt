@@ -1,6 +1,7 @@
 package com.collinao.invernadero.data.simulator
 
 import android.content.Context
+import com.collinao.invernadero.data.DeviceConfig
 import com.collinao.invernadero.data.model.ActuadorId
 import com.collinao.invernadero.data.model.AuditCategoria
 import com.collinao.invernadero.data.model.SensorData
@@ -45,7 +46,7 @@ class SimulatorEngine(
     }
 
     private val audit = AuditRepository()
-    private val deviceId = deviceRef.key ?: "sim-001"
+    private val deviceId = deviceRef.key ?: DeviceConfig.DEVICE_ID
     private val lecturasRef = deviceRef.child("lecturas")
     private val instanciaId = UUID.randomUUID().toString()
 
@@ -66,6 +67,9 @@ class SimulatorEngine(
     private val equiposForzados = mutableSetOf<String>()
 
     fun start() {
+        // Con el ESP32 real el simulador no corre: el dispositivo físico escribe sensores,
+        // estado y lecturas, y ejecuta la automatización (ver sketch de Arduino).
+        if (!DeviceConfig.USAR_SIMULADOR) return
         if (running) return
         running = true
 

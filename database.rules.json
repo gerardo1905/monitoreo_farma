@@ -20,22 +20,33 @@
       }
     },
 
+    "dispositivosAutorizados": {
+      ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('rol').val() === 'admin' && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+      ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('rol').val() === 'admin' && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+      "$deviceId": {
+        "$uid": { ".validate": "newData.isBoolean()" }
+      }
+    },
+
     "dispositivos": {
       "$deviceId": {
         "sensores": {
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
-          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true && root.child('dispositivosAutorizados').child($deviceId).child(auth.uid).val() === true",
           ".validate": "newData.hasChildren(['temperatura', 'humedadAire', 'timestamp'])",
           "temperatura": { ".validate": "newData.isNumber() && newData.val() >= -60 && newData.val() <= 100" },
           "humedadAire": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
-          "timestamp": { ".validate": "newData.isNumber()" },
+          "timestamp": { ".validate": "newData.isNumber() && newData.val() > 1600000000000 && newData.val() <= now + 60000" },
           "$other": { ".validate": false }
         },
         "estado": {
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
-          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true && root.child('dispositivosAutorizados').child($deviceId).child(auth.uid).val() === true",
           "online": { ".validate": "newData.isBoolean()" },
           "ultimaConexion": { ".validate": "newData.isNumber()" },
+          "rssi": { ".validate": "newData.isNumber() && newData.val() >= -120 && newData.val() <= 0" },
+          "pendientes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1440" },
+          "firmware": { ".validate": "newData.isString() && newData.val().length <= 20" },
           "simulador": {
             ".validate": "newData.hasChildren(['id', 'ts'])",
             "id": { ".validate": "newData.isString() && newData.val().length <= 64" },
@@ -60,12 +71,25 @@
         },
         "lecturas": {
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
-          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true && root.child('dispositivosAutorizados').child($deviceId).child(auth.uid).val() === true",
           "$slot": {
             ".validate": "$slot.matches(/^[0-9]{1,4}$/) && newData.hasChildren(['temperatura', 'humedadAire', 'timestamp'])",
             "temperatura": { ".validate": "newData.isNumber() && newData.val() >= -60 && newData.val() <= 100" },
             "humedadAire": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
-            "timestamp": { ".validate": "newData.isNumber()" },
+            "timestamp": { ".validate": "newData.isNumber() && newData.val() > 1600000000000 && newData.val() <= now + 60000" },
+            "$other": { ".validate": false }
+          }
+        },
+        "firmas": {
+          ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          "$dato": {
+            ".validate": "($dato === 'bomba' || $dato === 'ventilador' || $dato === 'bocina' || $dato === 'led' || $dato === 'thresholds') && newData.hasChildren(['ts', 'hash', 'origen']) && ($dato === 'thresholds' || newData.hasChildren(['valor', 'modo']))",
+            "valor": { ".validate": "newData.isBoolean()" },
+            "modo": { ".validate": "newData.val() === 'auto' || newData.val() === 'manual'" },
+            "ts": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{13}$/)" },
+            "hash": { ".validate": "newData.isString() && newData.val().matches(/^[0-9a-f]{64}$/)" },
+            "origen": { ".validate": "newData.val() === 'app' || newData.val() === 'esp32'" },
             "$other": { ".validate": false }
           }
         },
@@ -73,13 +97,13 @@
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
           ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('rol').val() === 'admin' && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
           ".validate": "newData.hasChildren(['temperaturaMax', 'temperaturaMin', 'humedadAireMax', 'humedadAireMin', 'automatizacionActiva', 'alertaTemperaturaMax', 'alertaTemperaturaMin', 'alertaHumedadMax', 'alertaHumedadMin']) && newData.child('temperaturaMin').val() < newData.child('temperaturaMax').val() && newData.child('humedadAireMin').val() < newData.child('humedadAireMax').val() && newData.child('alertaTemperaturaMin').val() < newData.child('alertaTemperaturaMax').val() && newData.child('alertaHumedadMin').val() < newData.child('alertaHumedadMax').val()",
-          "temperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= -5 && newData.val() <= 20" },
-          "temperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= -5 && newData.val() <= 20" },
+          "temperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 50" },
+          "temperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 50" },
           "humedadAireMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "humedadAireMin": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "automatizacionActiva": { ".validate": "newData.isBoolean()" },
-          "alertaTemperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= -5 && newData.val() <= 25" },
-          "alertaTemperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= -10 && newData.val() <= 20" },
+          "alertaTemperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 60" },
+          "alertaTemperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= -10 && newData.val() <= 50" },
           "alertaHumedadMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "alertaHumedadMin": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "$other": { ".validate": false }

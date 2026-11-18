@@ -1,34 +1,27 @@
-# Gradle / Android Studio
-*.iml
+# --- Compilación (se regenera sola) ---
 .gradle/
 .kotlin/
-/build/
-/app/build/
+build/
+**/build/
 /captures/
 .externalNativeBuild
 .cxx
-local.properties
-
-# Android Studio (se conserva solo lo compartible)
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-/.idea/deploymentTargetSelector.xml
-/.idea/deploymentTargetDropdown.xml
-/.idea/other.xml
-/.idea/misc.xml
-
-# Sistema
-.DS_Store
-Thumbs.db
-
-# Respaldos y archivos temporales (no deben subirse)
-/_backup_original/
-/Claude outputs/
 *.apk
 *.aab
+
+# --- Configuración personal de Android Studio ---
+.idea/
+*.iml
+
+# --- Credenciales y claves: NUNCA se suben ---
+local.properties
+/esp32/**/secrets.h
+/app/src/main/java/com/collinao/invernadero/security/ClaveHmac.kt
 *.keystore
 *.jks
+
+# --- Sistema y temporales ---
+.DS_Store
+Thumbs.db
+/_backup_original/
+/Claude outputs/

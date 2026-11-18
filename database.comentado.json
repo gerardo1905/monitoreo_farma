@@ -36,28 +36,45 @@
       }
     },
 
+    // ================= DISPOSITIVOS AUTORIZADOS (ISO 27001 - control de acceso / mínimo privilegio) =================
+    // Lista blanca: dispositivosAutorizados/<deviceId>/<uid de la cuenta del ESP32> = true.
+    // SOLO las cuentas de esta lista pueden escribir sensores, estado y lecturas de ese dispositivo,
+    // así un usuario común no puede inyectar lecturas falsas. Solo un admin activo la lee y la modifica.
+    "dispositivosAutorizados": {
+      ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('rol').val() === 'admin' && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+      ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('rol').val() === 'admin' && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+      "$deviceId": {
+        "$uid": { ".validate": "newData.isBoolean()" }
+      }
+    },
+
     // ================= DISPOSITIVOS: ESP32 / simulador =================
     // Todo lo de un dispositivo requiere cuenta ACTIVA; lo sensible exige admin.
     "dispositivos": {
       "$deviceId": {
-        // --- sensores: última lectura de temperatura y humedad (la escribe el ESP32/simulador) ---
-        // Rangos físicos razonables para rechazar datos corruptos o manipulados.
+        // --- sensores: última lectura de temperatura y humedad. SOLO la escribe un dispositivo autorizado (ESP32) ---
+        // timestamp: debe ser una fecha real y no del futuro (integridad: se rechazan lecturas con hora falsa).
+        // Rangos físicos razonables para rechazar datos corruptos o manipulados (integridad).
         "sensores": {
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
-          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true && root.child('dispositivosAutorizados').child($deviceId).child(auth.uid).val() === true",
           ".validate": "newData.hasChildren(['temperatura', 'humedadAire', 'timestamp'])",
           "temperatura": { ".validate": "newData.isNumber() && newData.val() >= -60 && newData.val() <= 100" },
           "humedadAire": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
-          "timestamp": { ".validate": "newData.isNumber()" },
+          "timestamp": { ".validate": "newData.isNumber() && newData.val() > 1600000000000 && newData.val() <= now + 60000" },
           "$other": { ".validate": false }
         },
         // --- estado: conexión del dispositivo. 'ultimaConexion' es el latido (heartbeat) para saber si está en línea;
-        // 'simulador' es el 'turno' que evita que dos teléfonos simulen datos a la vez. ---
+        // 'simulador' es el 'turno' del simulador (desactivado con el ESP32 real).
+        // rssi = señal WiFi, pendientes = lecturas guardadas en el ESP32 sin conexión, firmware = versión. ---
         "estado": {
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
-          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true && root.child('dispositivosAutorizados').child($deviceId).child(auth.uid).val() === true",
           "online": { ".validate": "newData.isBoolean()" },
           "ultimaConexion": { ".validate": "newData.isNumber()" },
+          "rssi": { ".validate": "newData.isNumber() && newData.val() >= -120 && newData.val() <= 0" },
+          "pendientes": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1440" },
+          "firmware": { ".validate": "newData.isString() && newData.val().length <= 20" },
           "simulador": {
             ".validate": "newData.hasChildren(['id', 'ts'])",
             "id": { ".validate": "newData.isString() && newData.val().length <= 64" },
@@ -82,33 +99,50 @@
           ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
           "$act": { ".validate": "($act === 'bomba' || $act === 'ventilador' || $act === 'bocina' || $act === 'led') && (newData.val() === 'auto' || newData.val() === 'manual')" }
         },
-        // --- lecturas: historial para las gráficas. Buffer circular de hasta 1440 posiciones (1 por minuto, 24 h).
+        // --- lecturas: historial para las gráficas (solo dispositivo autorizado; el ESP32 sube aquí lo que guardó sin conexión). Buffer circular de hasta 1440 posiciones (1 por minuto, 24 h).
         // $slot debe ser un número de 1 a 4 dígitos; cada lectura exige temperatura, humedad y timestamp. ---
         "lecturas": {
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
-          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true && root.child('dispositivosAutorizados').child($deviceId).child(auth.uid).val() === true",
           "$slot": {
             ".validate": "$slot.matches(/^[0-9]{1,4}$/) && newData.hasChildren(['temperatura', 'humedadAire', 'timestamp'])",
             "temperatura": { ".validate": "newData.isNumber() && newData.val() >= -60 && newData.val() <= 100" },
             "humedadAire": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
-            "timestamp": { ".validate": "newData.isNumber()" },
+            "timestamp": { ".validate": "newData.isNumber() && newData.val() > 1600000000000 && newData.val() <= now + 60000" },
             "$other": { ".validate": false }
           }
         },
-        // --- thresholds: umbrales de automatización y de alarma ---
+        // --- firmas: hash HMAC-SHA256 de cada dato enviado (3.1.1.1 / 3.1.1.2, integridad en tránsito) ---
+        // firmas/<equipo> acompaña a cada comando y firmas/thresholds a cada cambio de umbrales.
+        // hash = HMAC-SHA256(clave secreta, "dispositivo|dato|valores|ts"): 64 caracteres hexadecimales.
+        // El ESP32 recalcula el hash antes de obedecer; sin la clave no se puede falsificar.
+        "firmas": {
+          ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
+          "$dato": {
+            ".validate": "($dato === 'bomba' || $dato === 'ventilador' || $dato === 'bocina' || $dato === 'led' || $dato === 'thresholds') && newData.hasChildren(['ts', 'hash', 'origen']) && ($dato === 'thresholds' || newData.hasChildren(['valor', 'modo']))",
+            "valor": { ".validate": "newData.isBoolean()" },
+            "modo": { ".validate": "newData.val() === 'auto' || newData.val() === 'manual'" },
+            "ts": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{13}$/)" },
+            "hash": { ".validate": "newData.isString() && newData.val().matches(/^[0-9a-f]{64}$/)" },
+            "origen": { ".validate": "newData.val() === 'app' || newData.val() === 'esp32'" },
+            "$other": { ".validate": false }
+          }
+        },
+        // --- thresholds: umbrales de automatización y de alarma (rangos de temperatura 0-50 °C, los del sensor DHT11) ---
         // Leer: cualquier cuenta activa. ESCRIBIR: solo admin activo.
         // La validación exige que cada 'Min' sea menor que su 'Max' y limita los rangos permitidos.
         "thresholds": {
           ".read": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
           ".write": "auth != null && root.child('usuarios').child(auth.uid).child('perfil').child('rol').val() === 'admin' && root.child('usuarios').child(auth.uid).child('perfil').child('activo').val() === true",
           ".validate": "newData.hasChildren(['temperaturaMax', 'temperaturaMin', 'humedadAireMax', 'humedadAireMin', 'automatizacionActiva', 'alertaTemperaturaMax', 'alertaTemperaturaMin', 'alertaHumedadMax', 'alertaHumedadMin']) && newData.child('temperaturaMin').val() < newData.child('temperaturaMax').val() && newData.child('humedadAireMin').val() < newData.child('humedadAireMax').val() && newData.child('alertaTemperaturaMin').val() < newData.child('alertaTemperaturaMax').val() && newData.child('alertaHumedadMin').val() < newData.child('alertaHumedadMax').val()",
-          "temperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= -5 && newData.val() <= 20" },
-          "temperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= -5 && newData.val() <= 20" },
+          "temperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 50" },
+          "temperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 50" },
           "humedadAireMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "humedadAireMin": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "automatizacionActiva": { ".validate": "newData.isBoolean()" },
-          "alertaTemperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= -5 && newData.val() <= 25" },
-          "alertaTemperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= -10 && newData.val() <= 20" },
+          "alertaTemperaturaMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 60" },
+          "alertaTemperaturaMin": { ".validate": "newData.isNumber() && newData.val() >= -10 && newData.val() <= 50" },
           "alertaHumedadMax": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "alertaHumedadMin": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
           "$other": { ".validate": false }

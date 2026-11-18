@@ -9,19 +9,30 @@ data class SensorData(
 data class DeviceStatus(
     val online: Boolean = false,
     val bombaActiva: Boolean = false,
-    val ultimaConexion: Long = 0L
+    val ultimaConexion: Long = 0L,
+    /** Lecturas que el ESP32 guardó sin conexión y aún no sube (3.1.1.4). */
+    val pendientes: Int = 0,
+    /** Señal WiFi del ESP32 en dBm (0 = sin dato). */
+    val rssi: Int = 0
 )
 
+/**
+ * Umbrales por defecto: almacenamiento de medicamentos a temperatura ambiente controlada
+ * (15–25 °C, humedad 30–60 %), dentro del rango que mide el sensor DHT11 (0–50 °C, 20–90 %).
+ * - temperaturaMax: sobre este valor se enciende la BOMBA de agua (enfría).
+ * - humedadAireMax: sobre este valor se enciende el VENTILADOR (baja la humedad).
+ * - alerta*: zona crítica, suena la alarma y el buzzer.
+ */
 data class Thresholds(
-    val temperaturaMax: Float = 8f,
-    val temperaturaMin: Float = 2f,
-    val humedadAireMax: Float = 70f,
+    val temperaturaMax: Float = 25f,
+    val temperaturaMin: Float = 15f,
+    val humedadAireMax: Float = 60f,
     val humedadAireMin: Float = 30f,
     val automatizacionActiva: Boolean = true,
-    val alertaTemperaturaMax: Float = 10f,
-    val alertaTemperaturaMin: Float = 0f,
-    val alertaHumedadMax: Float = 85f,
-    val alertaHumedadMin: Float = 15f
+    val alertaTemperaturaMax: Float = 30f,
+    val alertaTemperaturaMin: Float = 10f,
+    val alertaHumedadMax: Float = 80f,
+    val alertaHumedadMin: Float = 20f
 )
 
 /**

@@ -35,6 +35,10 @@ class AlarmMonitor(
     private val scope: CoroutineScope
 ) {
     companion object {
+        /**
+         * FALLA SEGURA (fail-safe): una lectura de más de 60 s se considera vieja y NO dispara la
+         * alarma. Si el ESP32 se apaga o pierde conexión, no se actúa con un dato antiguo.
+         */
         const val LECTURA_VIGENTE_MS = 60_000L
 
         /** Tiempo para atender la alarma y también intervalo entre alertas repetidas. */
@@ -72,6 +76,7 @@ class AlarmMonitor(
                 val edad = ahora + offset - sensor.timestamp
                 if (sensor.timestamp == 0L || edad > LECTURA_VIGENTE_MS) null else evaluar(sensor, umbrales)
             }
+                // FALLA SEGURA (fail-safe): un error de red o de permisos no cierra la app
                 .catch { /* sin permiso o sin red: se reintenta al próximo inicio de sesión */ }
                 .collect { evaluacion -> procesar(evaluacion) }
         }

@@ -30,6 +30,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.collinao.invernadero.R
+import com.collinao.invernadero.data.local.AccionLocal
+import com.collinao.invernadero.data.local.BitacoraLocal
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.collinao.invernadero.data.model.ActuadorId
 import com.collinao.invernadero.data.model.EstadoActuador
 import com.collinao.invernadero.data.model.Thresholds
@@ -70,6 +75,10 @@ fun DashboardScreen(
     val actuadores by viewModel.actuadores.collectAsStateWithLifecycle()
     val umbrales by viewModel.umbrales.collectAsStateWithLifecycle()
     val alerta by viewModel.alertaMensaje.collectAsStateWithLifecycle()
+    val conectadoServidor by viewModel.conectadoServidor.collectAsStateWithLifecycle()
+    val pendientesDispositivo by viewModel.pendientesDispositivo.collectAsStateWithLifecycle()
+    val accionesLocales by viewModel.accionesLocales.collectAsStateWithLifecycle()
+    val accionesPendientes by viewModel.accionesPendientes.collectAsStateWithLifecycle()
 
     val hayLectura = sensorData.timestamp != 0L
 
@@ -112,6 +121,56 @@ fun DashboardScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // --- 3.1.1.3 / 3.1.2.7: aviso de conexión del teléfono con el servidor ---
+        AnimatedVisibility(
+            visible = !conectadoServidor,
+            enter = fadeIn(tween(300)) + expandVertically(tween(300)),
+            exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+        ) {
+            Column {
+                Tarjeta(modifier = Modifier.fillMaxWidth(), color = AdvertenciaSuave) {
+                    Text(
+                        text = stringResource(R.string.sin_conexion_servidor_titulo),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Tinta
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.sin_conexion_servidor_detalle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TintaSuave
+                    )
+                    if (accionesPendientes > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.acciones_pendientes_locales, accionesPendientes),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Tinta
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+
+        // --- 3.1.1.4: el ESP32 está subiendo lecturas que guardó mientras no tenía conexión ---
+        AnimatedVisibility(
+            visible = conectadoServidor && pendientesDispositivo > 0,
+            enter = fadeIn(tween(300)) + expandVertically(tween(300)),
+            exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+        ) {
+            Column {
+                Tarjeta(modifier = Modifier.fillMaxWidth(), color = Vidrio) {
+                    Text(
+                        text = stringResource(R.string.dispositivo_sincronizando, pendientesDispositivo),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TintaSuave
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
 
         // --- Alerta: entra y sale con animación ---
         AnimatedVisibility(
@@ -195,7 +254,50 @@ fun DashboardScreen(
             }
             Spacer(modifier = Modifier.height(12.dp))
         }
+
+        // --- 3.1.2.7: base de datos local del teléfono (acciones y su estado de sincronización) ---
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(stringResource(R.string.historial_local_titulo), style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = stringResource(R.string.historial_local_subtitulo),
+            style = MaterialTheme.typography.bodySmall,
+            color = TintaSuave
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Tarjeta(modifier = Modifier.fillMaxWidth()) {
+            if (accionesLocales.isEmpty()) {
+                Text(stringResource(R.string.historial_local_vacio), style = MaterialTheme.typography.bodySmall, color = TintaSuave)
+            }
+            accionesLocales.forEachIndexed { i, accion ->
+                if (i > 0) Spacer(modifier = Modifier.height(10.dp))
+                FilaAccionLocal(accion)
+            }
+        }
         Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+/** Una acción de la base local: hora, detalle y estado (PENDIENTE / SINCRONIZADO / RECHAZADO). */
+@Composable
+private fun FilaAccionLocal(accion: AccionLocal) {
+    val formato = SimpleDateFormat("dd/MM HH:mm:ss", Locale.getDefault())
+    val (texto, color) = when (accion.estado) {
+        BitacoraLocal.SINCRONIZADO -> stringResource(R.string.estado_sincronizado) to Correcto
+        BitacoraLocal.RECHAZADO -> stringResource(R.string.estado_rechazado) to Critico
+        else -> stringResource(R.string.estado_pendiente) to Advertencia
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(accion.detalle, style = MaterialTheme.typography.bodySmall, color = Tinta)
+            Text(
+                text = formato.format(Date(accion.fecha)) +
+                        (accion.sincronizadoEn?.let { " · " + stringResource(R.string.sincronizado_a_las, formato.format(Date(it))) } ?: ""),
+                style = MaterialTheme.typography.labelSmall,
+                color = TintaSuave
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        EtiquetaEstado(texto = texto, colorPunto = color)
     }
 }
 
